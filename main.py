@@ -10,10 +10,13 @@ llms to test:
 import os
 from typing import List
 import time
-from gemini_call import generate_content
+from gemini_call import generate_projects
 import json
+import claude_call
+import gemini_call
+import chatgpt_call  # Import the module instead of the function
 
-categories = categories = categories = [
+categories = [
     # Core Business & Commerce
     "Accounting", "Advertising", "Auctions", "Business",
     "Consulting", "CRM", "Crowdfunding", "E-commerce", "Entrepreneurship", 
@@ -85,9 +88,9 @@ VERY IMPORTANT: also explain the tech stack that you would recommend for this pr
 
 def get_project_ideas(category: str) -> str:
     prompt = f"Generate a list of project ideas in web development that pertain to this category: {category}. You should generate 9 project ideas. These projects should try to address some problem or need that exists in the category. The project idea descriptions should be a lengthy few paragraphs, and explain in detail the idea and the features it has. Also, generate projects of different difficulty. Generate 3 Easy projects (which a beginner web dev could do), 3 Medium difficulty projects (which may take a mid level engineer several months to finish) and 3 Difficult projects (which would require a senior engineer and operate on a very large scale and with novel challenges). IMPORTANT: do not focus on the tech stack, only include the features and what the project is about. Provide your answer as json, in the following format: {{'category': 'The category you are doing this for', 'project_ideas': [{{'title': 'Project Title', 'description': 'Project Description', 'difficulty': 'Easy/Medium/Difficult''}}, ...]}}"
-    return generate_content(prompt)
+    return generate_projects(prompt)
 
-def main():
+def generate_project_ideas():
     # Create a directory to store results if it doesn't exist
     if not os.path.exists('project_ideas'):
         os.makedirs('project_ideas')
@@ -122,5 +125,57 @@ def main():
     
     print(f"All project ideas have been written to {filename}")
 
+
+def generate_tech_stack():
+    # Read the existing project ideas
+    filename = "project_ideas/all_project_ideas.json"
+    output_filename = "project_ideas/ideas_with_tech.json"
+    
+    with open(filename, 'r') as f:
+        project_ideas = json.load(f)
+    
+    # Initialize or load the output file
+    if os.path.exists(output_filename):
+        with open(output_filename, 'r') as f:
+            processed_ideas = json.load(f)
+    else:
+        processed_ideas = project_ideas
+    
+    # Process each category and its project ideas
+    for category_data in project_ideas:
+        category = category_data.get('category', '')
+        ideas = category_data.get('ideas', [])
+        
+        for project in ideas['project_ideas']:
+
+            if not project.get('jsonified_tech_stack'):
+                prompt = f"Give me an overview for how I should Build the following project: {project.get('title', '')} - {project.get('description', '')}. In general, I want some help devising a plan to build this project, including what technologies I should be using. Please include the tech stack in your response, this means telling me how to do the frontend, backend, databases, hosting, authentication, etc. Give me a high level overview of how you would recommend I build this. IMPORTANT: keep this opinionated, don't give me multiple options, just give me the best one."
+                
+                # Get tech stack recommendation from Claude
+                tech_stack_claude = claude_call.generate_tech_stack(prompt)
+                tech_stack_chatgpt = chatgpt_call.generate_tech_stack(prompt)
+                tech_stack_gemini = gemini_call.generate_tech_stack(prompt)
+                
+                # Add the tech stack to the project
+                project['claude_tech'] = tech_stack_claude
+                project['chatgpt_tech'] = tech_stack_chatgpt
+                project['gemini_tech'] = tech_stack_gemini
+
+                # jsonify the tech stack
+                jsonify_tech_stack_prompt = f"I am going to provide a list of tech project overviews from multiple LLms, I want you to take these, and extract the tech stack recommendations from each, and return them in a json of the following format: claude_tech: {{backend_languages: string, backend_frameworks: string, databases: string, other_tools: string, frontend_frameworks: string, frontend_libraries: string, hosting: string, authentication: string, orms: string, frontend_styling_solutions: string}}, chatgpt_tech: {{...}}, gemini_tech: {{...}} IMPORTANT: Be selective - only return the tech stack recommendations explictly recommended in the project overview, and don't include any other tech stack recommendations. Heres the tech stach for claude: {tech_stack_claude}, heres the tech stack for chatgpt: {tech_stack_chatgpt}, heres the tech stack for gemini: {tech_stack_gemini}"
+                tech_stacks_json = gemini_call.jsonify_tech_stack(jsonify_tech_stack_prompt)
+                
+                print('tech stacks json: ', tech_stacks_json)
+                project['tech_stacks_json'] = tech_stacks_json
+            # Write the updated data after each project
+            with open(output_filename, 'w') as f:
+                json.dump(processed_ideas, f, indent=4)
+            
+            print(f"Processed project: {project.get('title', '')} in category: {category}")
+            time.sleep(1)  # Add a small delay between API calls
+    
+    print(f"All project ideas with tech stacks have been written to {output_filename}")
+
 if __name__ == "__main__":
-    main()
+    # generate_project_ideas()
+    generate_tech_stack()

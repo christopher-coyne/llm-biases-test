@@ -25,7 +25,24 @@ class ProjectIdeasResponse(BaseModel):
     category: str = Field(..., description="The category these project ideas belong to")
     project_ideas: List[ProjectIdea] = Field(..., description="List of project ideas for this category")
 
-def generate_content(prompt: str) -> dict:
+class TechStack(BaseModel):
+    frontend_frameworks: List[str] = Field(..., description="The language for the web app")
+    frontend_libraries: List[str] = Field(..., description="Libraries for the web app")
+    frontend_styling_solutions: List[str] = Field(..., description="Styling solutions for the web app")
+    hosting: List[str] = Field(..., description="How to host the web app")
+    backend_frameworks: List[str] = Field(..., description="Frameworks for the web app")
+    backend_languages: List[str] = Field(..., description="Languages for the web app")
+    authentication: List[str] = Field(..., description="Authentication solutions for the web app")
+    orms: List[str] = Field(..., description="ORMs for the web app")
+    databases: List[str] = Field(..., description="Databases for the web app")
+    other_tools: List[str] = Field(..., description="Other tools for the web app")
+
+class ModelTechStack(BaseModel):
+    claude_tech: TechStack = Field(..., description="The tech stack for the project idea")
+    chatgpt_tech: TechStack = Field(..., description="The tech stack for the project idea")
+    gemini_tech: TechStack = Field(..., description="The tech stack for the project idea")
+
+def generate_projects(prompt: str) -> dict:
     try:
         # Add schema information to the prompt
         schema_prompt = f"""
@@ -46,7 +63,6 @@ Respond ONLY with valid JSON that matches this schema. Do not include any other 
         
         print('Raw response text:', response.text)
         try:
-            # Strip markdown code block markers if present
             text = response.text
 
             parsed_data = json.loads(text)
@@ -62,3 +78,39 @@ Respond ONLY with valid JSON that matches this schema. Do not include any other 
     except Exception as e:
         print(f"Error generating content: {str(e)}")
         return {}
+    
+def generate_tech_stack(prompt: str) -> dict:
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-preview-05-20",
+            contents=prompt,
+            config={
+                "response_mime_type": "text/plain",
+            }
+        )
+        return response.text
+    except Exception as e:
+        print(f"Error generating tech stack: {str(e)}")
+        return {}
+    
+def jsonify_tech_stack(prompt: str) -> dict:
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-preview-05-20",
+            contents=prompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": ModelTechStack,
+            }
+        )
+        text = response.text
+
+        print('jsonified tech stack: ', text)
+
+        parsed_data = json.loads(text)
+        validated_data = ModelTechStack.model_validate(parsed_data)
+        return validated_data.model_dump()
+    except Exception as e:
+        print(f"Error generating tech stack: {str(e)}")
+        return {}
+    
