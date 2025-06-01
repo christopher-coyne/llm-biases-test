@@ -16,7 +16,7 @@ if not ANTHROPIC_API_KEY:
 # Initialize the client
 client = genai.Client(api_key=ANTHROPIC_API_KEY)
 
-def generate_tech_stack(prompt: str) -> dict:
+async def generate_tech_stack(prompt: str) -> dict:
     try:
         # Add schema information to the prompt
         schema_prompt = f"""
@@ -30,7 +30,7 @@ def generate_tech_stack(prompt: str) -> dict:
         ]
         )
         
-        print('Raw response text:', response.content[0].text)
+        print('claude response:', response.content[0].text)
         return response.content[0].text
     except Exception as e:
         print(f"Error generating content: {str(e)}")

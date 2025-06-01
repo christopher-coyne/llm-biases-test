@@ -79,7 +79,7 @@ Respond ONLY with valid JSON that matches this schema. Do not include any other 
         print(f"Error generating content: {str(e)}")
         return {}
     
-def generate_tech_stack(prompt: str) -> dict:
+async def generate_tech_stack(prompt: str) -> dict:
     try:
         response = client.models.generate_content(
             model="gemini-2.5-flash-preview-05-20",
@@ -96,7 +96,7 @@ def generate_tech_stack(prompt: str) -> dict:
 def jsonify_tech_stack(prompt: str) -> dict:
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash-preview-05-20",
+            model="gemini-2.0-flash",
             contents=prompt,
             config={
                 "response_mime_type": "application/json",

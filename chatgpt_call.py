@@ -16,7 +16,7 @@ if not OPENAI_API_KEY:
 # Initialize the client
 client = genai.Client(api_key=OPENAI_API_KEY)
 
-def generate_tech_stack(prompt: str) -> dict:
+async def generate_tech_stack(prompt: str) -> dict:
     try:
         # Add schema information to the prompt
         schema_prompt = f"""
@@ -32,7 +32,7 @@ def generate_tech_stack(prompt: str) -> dict:
             input=schema_prompt,
         )
             
-        print(response.output_text)
+        print('chatgpt response:', response.output_text)
         return response.output_text
     except Exception as e:
         print(f"Error generating content: {str(e)}")

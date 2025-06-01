@@ -15,6 +15,7 @@ import json
 import claude_call
 import gemini_call
 import chatgpt_call  # Import the module instead of the function
+import asyncio
 
 categories = [
     # Core Business & Commerce
@@ -126,9 +127,18 @@ def generate_project_ideas():
     print(f"All project ideas have been written to {filename}")
 
 
+# Assuming your methods are async
+async def get_all_tech_stacks(prompt):
+    tech_stack_claude, tech_stack_chatgpt, tech_stack_gemini = await asyncio.gather(
+        claude_call.generate_tech_stack(prompt),
+        chatgpt_call.generate_tech_stack(prompt),
+        gemini_call.generate_tech_stack(prompt)
+    )
+    return tech_stack_claude, tech_stack_chatgpt, tech_stack_gemini
+
 def generate_tech_stack():
     # Read the existing project ideas
-    filename = "project_ideas/all_project_ideas.json"
+    filename = "project_ideas/ideas_with_tech.json"
     output_filename = "project_ideas/ideas_with_tech.json"
     
     with open(filename, 'r') as f:
@@ -139,24 +149,24 @@ def generate_tech_stack():
         with open(output_filename, 'r') as f:
             processed_ideas = json.load(f)
     else:
-        processed_ideas = project_ideas
+        processed_ideas = project_ideas.copy() 
     
     # Process each category and its project ideas
-    for category_data in project_ideas:
+    for category_data in processed_ideas:
         category = category_data.get('category', '')
         ideas = category_data.get('ideas', [])
         
         for project in ideas['project_ideas']:
-
-            if not project.get('jsonified_tech_stack'):
+            print('processing project: ', project.get('title', ''))
+            if project.get('tech_stacks_json'):
+                print('project already has a tech stack')
+            else:
                 prompt = f"Give me an overview for how I should Build the following project: {project.get('title', '')} - {project.get('description', '')}. In general, I want some help devising a plan to build this project, including what technologies I should be using. Please include the tech stack in your response, this means telling me how to do the frontend, backend, databases, hosting, authentication, etc. Give me a high level overview of how you would recommend I build this. IMPORTANT: keep this opinionated, don't give me multiple options, just give me the best one."
                 
-                # Get tech stack recommendation from Claude
-                tech_stack_claude = claude_call.generate_tech_stack(prompt)
-                tech_stack_chatgpt = chatgpt_call.generate_tech_stack(prompt)
-                tech_stack_gemini = gemini_call.generate_tech_stack(prompt)
-                
                 # Add the tech stack to the project
+                tech_stack_claude, tech_stack_chatgpt, tech_stack_gemini = asyncio.run(
+                get_all_tech_stacks(prompt))
+
                 project['claude_tech'] = tech_stack_claude
                 project['chatgpt_tech'] = tech_stack_chatgpt
                 project['gemini_tech'] = tech_stack_gemini
@@ -165,14 +175,13 @@ def generate_tech_stack():
                 jsonify_tech_stack_prompt = f"I am going to provide a list of tech project overviews from multiple LLms, I want you to take these, and extract the tech stack recommendations from each, and return them in a json of the following format: claude_tech: {{backend_languages: string, backend_frameworks: string, databases: string, other_tools: string, frontend_frameworks: string, frontend_libraries: string, hosting: string, authentication: string, orms: string, frontend_styling_solutions: string}}, chatgpt_tech: {{...}}, gemini_tech: {{...}} IMPORTANT: Be selective - only return the tech stack recommendations explictly recommended in the project overview, and don't include any other tech stack recommendations. Heres the tech stach for claude: {tech_stack_claude}, heres the tech stack for chatgpt: {tech_stack_chatgpt}, heres the tech stack for gemini: {tech_stack_gemini}"
                 tech_stacks_json = gemini_call.jsonify_tech_stack(jsonify_tech_stack_prompt)
                 
-                print('tech stacks json: ', tech_stacks_json)
                 project['tech_stacks_json'] = tech_stacks_json
-            # Write the updated data after each project
-            with open(output_filename, 'w') as f:
-                json.dump(processed_ideas, f, indent=4)
+                # Write the updated data after each project
+                with open(output_filename, 'w') as f:
+                    json.dump(processed_ideas, f, indent=4)
+                time.sleep(1)  # Add a small delay between API calls
             
             print(f"Processed project: {project.get('title', '')} in category: {category}")
-            time.sleep(1)  # Add a small delay between API calls
     
     print(f"All project ideas with tech stacks have been written to {output_filename}")
 
