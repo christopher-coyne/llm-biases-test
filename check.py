@@ -1,4 +1,5 @@
 import json
+from tech_normalizer import normalize_technology
 
 def create_outputs():
     # Full results for the json
@@ -20,69 +21,88 @@ def create_outputs():
         ideas = category_data.get('ideas').get('project_ideas')
         results['all_project_ideas'][category] = [{'title': idea['title'], 'description': idea['description'], 'difficulty': idea['difficulty']} for idea in ideas]
 
-    # get tech stacks
-    results['hosting'] = {}
-    results['frontend_frameworks'] = {}
-    results['frontend_styling'] = {}
-    results['frontend_libraries'] = {}
+    # Initialize tech stack categories
+    tech_categories = ['hosting', 'frontend_frameworks', 'frontend_styling_solutions', 'frontend_libraries', 
+                      'backend_frameworks', 'backend_languages', 'authentication', 'orms', 'databases', 'other_tools']
+    
+    for category in tech_categories:
+        results[category] = {}
+    
+    # Tech stack sources to iterate through
+    tech_sources = ['claude_tech', 'gemini_tech', 'chatgpt_tech']
+    
     counter = 0
     for category in processed_ideas:
         ideas = category.get('ideas').get('project_ideas')
         for idea in ideas:
-            # add hosting to results
-            claude_hosting = idea['tech_stacks_json']['claude_tech']['hosting']
-            for hosting in claude_hosting:
-                results['hosting'][hosting] = results['hosting'].get(hosting, 0) + 1
-            gemini_hosting = idea['tech_stacks_json']['gemini_tech']['hosting']
-            for hosting in gemini_hosting:
-                results['hosting'][hosting] = results['hosting'].get(hosting, 0) + 1
-            chatgpt_hosting = idea['tech_stacks_json']['chatgpt_tech']['hosting']
-            for hosting in chatgpt_hosting:
-                results['hosting'][hosting] = results['hosting'].get(hosting, 0) + 1
+            # Loop through each tech source (claude, gemini, chatgpt)
+            for tech_source in tech_sources:
+                tech_data = idea.get('tech_stacks_json', {}).get(tech_source, {})
+                
+                # Loop through each tech category (hosting, frontend_frameworks, etc.)
+                for tech_category in tech_categories:
+                    tech_items = tech_data.get(tech_category, [])
+                    
+                    # Normalize each tech item and count the normalized version
+                    normalized_items = []
+                    for item in tech_items:
+                        normalized_item = normalize_technology(item, tech_category)
+                        normalized_items.append(normalized_item)
+                    
+                    # Count each normalized item in the category
+                    for normalized_item in normalized_items:
+                        results[tech_category][normalized_item] = results[tech_category].get(normalized_item, 0) + 1
 
-            # add frontend frameworks to results
-            claude_frontend = idea['tech_stacks_json']['claude_tech']['frontend_frameworks']
-            for frontend in claude_frontend:
-                results['frontend_frameworks'][frontend] = results['frontend_frameworks'].get(frontend, 0) + 1
-            gemini_frontend = idea['tech_stacks_json']['gemini_tech']['frontend_frameworks']
-            for frontend in gemini_frontend:
-                results['frontend_frameworks'][frontend] = results['frontend_frameworks'].get(frontend, 0) + 1
-            chatgpt_frontend = idea['tech_stacks_json']['chatgpt_tech']['frontend_frameworks']
-            for frontend in chatgpt_frontend:
-                results['frontend_frameworks'][frontend] = results['frontend_frameworks'].get(frontend, 0) + 1
-
-            # add frontend styling to results
-            claude_frontend_styling = idea['tech_stacks_json']['claude_tech']['frontend_styling_solutions']
-            for styling in claude_frontend_styling:
-                results['frontend_styling'][styling] = results['frontend_styling'].get(styling, 0) + 1
-            gemini_frontend_styling = idea['tech_stacks_json']['gemini_tech']['frontend_styling_solutions']
-            for styling in gemini_frontend_styling:
-                results['frontend_styling'][styling] = results['frontend_styling'].get(styling, 0) + 1
-            chatgpt_frontend_styling = idea['tech_stacks_json']['chatgpt_tech']['frontend_styling_solutions']
-            for styling in chatgpt_frontend_styling:
-                results['frontend_styling'][styling] = results['frontend_styling'].get(styling, 0) + 1
+    # LLM preferences
+    results['llm_preferences'] = {}
+    
+    # Initialize LLM preferences structure
+    for tech_source in tech_sources:
+        llm_name = tech_source.replace('_tech', '')  # Remove '_tech' suffix to get clean LLM name
+        results['llm_preferences'][llm_name] = {}
+        
+        # Initialize each tech category for this LLM
+        for tech_category in tech_categories:
+            results['llm_preferences'][llm_name][tech_category] = {}
+    
+    # Initialize difficulty preferences structure
+    results['difficulty_preferences'] = {}
+    difficulty_levels = ['Easy', 'Medium', 'Difficult']
+    
+    for difficulty in difficulty_levels:
+        results['difficulty_preferences'][difficulty] = {}
+        for tech_category in tech_categories:
+            results['difficulty_preferences'][difficulty][tech_category] = {}
+    
+    # Count LLM preferences and difficulty preferences
+    for category in processed_ideas:
+        ideas = category.get('ideas').get('project_ideas')
+        for idea in ideas:
+            difficulty = idea.get('difficulty', '')
             
-            # add frontend libraries to results
-            claude_frontend_libraries = idea['tech_stacks_json']['claude_tech']['frontend_libraries']
-            for library in claude_frontend_libraries:
-                if library == 'React Image Compare':
-                    print('idea', idea['title'])
-                    counter += 1
-                results['frontend_libraries'][library] = results['frontend_libraries'].get(library, 0) + 1
-            gemini_frontend_libraries = idea['tech_stacks_json']['gemini_tech']['frontend_libraries']
-            for library in gemini_frontend_libraries:
-                if library == 'React Image Compare':
-                    print('idea', idea['title'])
-                    counter += 1
-                results['frontend_libraries'][library] = results['frontend_libraries'].get(library, 0) + 1
-            chatgpt_frontend_libraries = idea['tech_stacks_json']['chatgpt_tech']['frontend_libraries']
-            for library in chatgpt_frontend_libraries:
-                if library == 'React Image Compare':
-                    print('idea', idea['title'])
-                    counter += 1
-                results['frontend_libraries'][library] = results['frontend_libraries'].get(library, 0) + 1
-
-            
+            # Loop through each tech source (claude, gemini, chatgpt)
+            for tech_source in tech_sources:
+                llm_name = tech_source.replace('_tech', '')
+                tech_data = idea.get('tech_stacks_json', {}).get(tech_source, {})
+                
+                # Loop through each tech category for this LLM
+                for tech_category in tech_categories:
+                    tech_items = tech_data.get(tech_category, [])
+                    
+                    # Normalize each tech item and count the normalized version
+                    normalized_items = []
+                    for item in tech_items:
+                        normalized_item = normalize_technology(item, tech_category)
+                        normalized_items.append(normalized_item)
+                    
+                    # Count each normalized item suggested by this LLM
+                    for normalized_item in normalized_items:
+                        # Count for LLM preferences
+                        results['llm_preferences'][llm_name][tech_category][normalized_item] = results['llm_preferences'][llm_name][tech_category].get(normalized_item, 0) + 1
+                        
+                        # Count for difficulty preferences
+                        if difficulty in difficulty_levels:
+                            results['difficulty_preferences'][difficulty][tech_category][normalized_item] = results['difficulty_preferences'][difficulty][tech_category].get(normalized_item, 0) + 1
 
     print(counter)
     # Write the results to the output file
