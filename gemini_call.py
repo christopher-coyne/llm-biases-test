@@ -7,15 +7,12 @@ from typing import List
 
 load_dotenv()
 
-# Configure the Gemini API
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 if not GOOGLE_API_KEY:
     raise ValueError("Please set the GOOGLE_API_KEY environment variable in your .env file.")
 
-# Initialize the client
 client = genai.Client(api_key=GOOGLE_API_KEY)
 
-# Define Pydantic models for schema validation
 class ProjectIdea(BaseModel):
     title: str = Field(..., description="The title of the project idea")
     description: str = Field(..., description="A detailed description of the project idea")
