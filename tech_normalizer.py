@@ -1066,19 +1066,19 @@ backend_frameworks_synonyms = {
     
     # Django variants
     "django": "Django",
-    "django rest framework": "Django REST Framework",
-    "django rest framework (drf)": "Django REST Framework",
-    "django (with django rest framework - drf)": "Django REST Framework",
-    "django with django rest framework (drf)": "Django REST Framework",
-    "django rest framework": "Django REST Framework",
-    "django (with django rest framework)": "Django REST Framework",
-    "python with django (and django rest framework)": "Django REST Framework",
-    "python 3.x with django & django rest framework (drf)": "Django REST Framework",
-    "python with django rest framework (drf)": "Django REST Framework",
+    "django rest framework": "Django",
+    "django rest framework (drf)": "Django",
+    "django (with django rest framework - drf)": "Django",
+    "django with django rest framework (drf)": "Django",
+    "django rest framework": "Django",
+    "django (with django rest framework)": "Django",
+    "python with django (and django rest framework)": "Django",
+    "python 3.x with django & django rest framework (drf)": "Django",
+    "python with django rest framework (drf)": "Django",
     "django (python)": "Django",
     "python with django": "Django",
     "django 5.x": "Django",
-    "django channels": "Django Channels",
+    "django channels": "Django",
     
     # Flask variants
     "flask": "Flask",
@@ -1343,24 +1343,28 @@ backend_frameworks_synonyms = {
 }
 
 backend_languages_synonyms = {
-    # Node.js variants
-    "node.js": "Node.js",
-    "nodejs": "Node.js",
-    "node": "Node.js",
-    "node.js with typescript": "Node.js + TypeScript",
-    "node.js (with typescript)": "Node.js + TypeScript",
-    "node.js (typescript)": "Node.js + TypeScript",
-    "typescript (with node.js)": "Node.js + TypeScript",
-    "typescript (node.js)": "Node.js + TypeScript",
-    "node.js/typescript": "Node.js + TypeScript",
-    "typescript with node.js": "Node.js + TypeScript",
-    "node.js with express.js (using typescript)": "Node.js + TypeScript",
-    "javascript (node.js)": "Node.js",
-    
-    # TypeScript variants
-    "typescript": "TypeScript",
-    "ts": "TypeScript",
-    "typescript/deno": "TypeScript",
+    # JavaScript/Node.js/TypeScript variants - all grouped together
+    "node.js": "JavaScript/Node.js",
+    "nodejs": "JavaScript/Node.js",
+    "node": "JavaScript/Node.js",
+    "node.js with typescript": "JavaScript/Node.js",
+    "node.js (with typescript)": "JavaScript/Node.js",
+    "node.js (typescript)": "JavaScript/Node.js",
+    "typescript (with node.js)": "JavaScript/Node.js",
+    "typescript (node.js)": "JavaScript/Node.js",
+    "node.js/typescript": "JavaScript/Node.js",
+    "typescript with node.js": "JavaScript/Node.js",
+    "node.js with express.js (using typescript)": "JavaScript/Node.js",
+    "javascript (node.js)": "JavaScript/Node.js",
+    "typescript": "JavaScript/Node.js",
+    "ts": "JavaScript/Node.js",
+    "typescript/deno": "JavaScript/Node.js",
+    "javascript": "JavaScript/Node.js",
+    "js": "JavaScript/Node.js",
+    "javascript/typescript": "JavaScript/Node.js",
+    "javascript (es6+)": "JavaScript/Node.js",
+    "vanilla javascript": "JavaScript/Node.js",
+    "vanilla javascript (es6+)": "JavaScript/Node.js",
     
     # Python variants
     "python": "Python",
@@ -1369,14 +1373,6 @@ backend_languages_synonyms = {
     "python 3.9+": "Python",
     "python 3.10+": "Python",
     "django (python)": "Python",
-    
-    # JavaScript variants
-    "javascript": "JavaScript",
-    "js": "JavaScript",
-    "javascript/typescript": "JavaScript/TypeScript",
-    "javascript (es6+)": "JavaScript",
-    "vanilla javascript": "JavaScript",
-    "vanilla javascript (es6+)": "JavaScript",
     
     # Go variants
     "go": "Go",
@@ -1402,7 +1398,7 @@ backend_languages_synonyms = {
     "c++": "C++",
     "arduino ide (c++)": "C++",
     "scala": "Scala",
-    "deno": "Deno",
+    "deno": "JavaScript/Node.js",
     
     # HTML/CSS (when used as backend context)
     "html": "HTML",

@@ -139,7 +139,7 @@ async def get_all_tech_stacks(prompt):
 def generate_tech_stack():
     # Read the existing project ideas
     filename = "project_ideas/ideas_with_tech.json"
-    output_filename = "project_ideas/ideas_with_tech.json"
+    output_filename = "project_ideas/new_ideas_with_tech.json"
     
     with open(filename, 'r') as f:
         project_ideas = json.load(f)
